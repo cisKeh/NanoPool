@@ -13,12 +13,19 @@ except IOError as e:
 
 while True:
     try:
+
+        ########INITIATE CONNECTION#########
         content=requests.get("https://api.nanopool.org/v1/eth/user/"+address)
-        payementContent=requests.get("https://api.nanopool.org/v1/eth/payments/"+address)
-        #########HASHRATE INFO########
         generalInfo=content.json()
         data=generalInfo["data"]
-        # print(data)
+        payementContent=requests.get("https://api.nanopool.org/v1/eth/payments/"+address)
+        payementInfo=payementContent.json()
+        payementData=payementInfo["data"]
+        moneyContent=requests.get("https://api.nanopool.org/v1/eth/approximated_earnings/"+data["hashrate"])
+        moneyInfo=moneyContent.json()
+        moneyData=moneyInfo["data"]
+
+        #########HASHRATE INFO########
         print("\n"*5)
         print("NanoPool ----> {}\033[0m".format("\033[92mONLINE" if generalInfo["status"] else "\033[91mOUTLINE"))
         print("balance :\t\t{} ETH".format(data["balance"]))
@@ -33,14 +40,16 @@ while True:
             print("\tWAvgH3 : {:.4} Mh/s\t WAvgH12 : {:.4} Mh/s".format(worker["h3"],worker["h12"]))
 
         #######PAYEMENT#######
-        payementInfo=payementContent.json()
-        payementData=payementInfo["data"]
-        # print(payementInfo)
         print("\nPayements:")
         for payement in payementData :
             print("\taddress: {}\n\tamount: {} ETH\t\tconfirmed: {}\033[0m".format(payement["txHash"],payement["amount"],"\033[92mTrue" if payement["confirmed"] else "\033[91mFalse"))
 
 
-        sleep(10)
+        ########MONEY########
+        print("\nEstimate:\n\t{:.2f}€/hour\t{:.2f}€/day\t{:.2f}€/week\t{:.2f}€/month".format(moneyData["hour"]["euros"],moneyData["day"]["euros"],moneyData["week"]["euros"],moneyData["month"]["euros"]))
+
+
+
+        sleep(60)
     except Exception as e:
         print(e)
